@@ -1,10 +1,9 @@
 import type { NextConfig } from "next";
 
 const isProd = process.env.NODE_ENV === "production";
-const repoName = process.env.NEXT_PUBLIC_BASE_PATH || "KSarchive-main";
+const repoName = "KSarchive";
 
 const nextConfig: NextConfig = {
-  reactStrictMode: true,
   output: "export",
   trailingSlash: true,
   images: {
