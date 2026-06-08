@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, BookOpenCheck, Flag, Landmark, Layers3, Swords, ListTree, UsersRound } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
+import { HistoryQuickView } from "@/components/history-quick-view";
 import { HistoryQuizPanel } from "@/components/history-quiz-panel";
 import { historyCategoryMeta, modernHistoryStudyTips, modernHistoryTimeline } from "@/lib/history-data";
 
@@ -51,6 +52,8 @@ export default function HistoryPage() {
             );
           })}
         </section>
+
+        <HistoryQuickView />
 
         <section className="mt-8 rounded-[36px] border border-white/70 bg-white/85 p-5 shadow-card backdrop-blur-2xl sm:p-7">
           <div className="flex items-center gap-3">
