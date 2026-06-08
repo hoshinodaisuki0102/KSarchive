@@ -40,27 +40,31 @@ type Store = {
   users: UserRecord[];
 };
 
-const DATA_DIR = path.join(process.cwd(), "data");
+const DATA_DIR = process.env.VERCEL
+  ? path.join("/tmp", "ksarchive-data")
+  : path.join(process.cwd(), "data");
 const USERS_FILE = path.join(DATA_DIR, "users.json");
+const EMPTY_STORE: Store = { users: [] };
 
 async function ensureStore() {
   await fs.mkdir(DATA_DIR, { recursive: true });
   try {
     await fs.access(USERS_FILE);
   } catch {
-    await fs.writeFile(USERS_FILE, JSON.stringify({ users: [] }, null, 2), "utf-8");
+    await fs.writeFile(USERS_FILE, JSON.stringify(EMPTY_STORE, null, 2), "utf-8");
   }
 }
 
 export async function readStore(): Promise<Store> {
-  await ensureStore();
-  const raw = await fs.readFile(USERS_FILE, "utf-8");
   try {
+    await ensureStore();
+    const raw = await fs.readFile(USERS_FILE, "utf-8");
     const parsed = JSON.parse(raw) as Store;
-    if (!Array.isArray(parsed.users)) return { users: [] };
+    if (!Array.isArray(parsed.users)) return EMPTY_STORE;
     return parsed;
-  } catch {
-    return { users: [] };
+  } catch (error) {
+    console.error("KSarchive user store read failed:", error);
+    return EMPTY_STORE;
   }
 }
 
