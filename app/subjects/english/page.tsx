@@ -1,5 +1,5 @@
-import { EnglishExamLab } from "@/components/english-exam-lab";
+import { EnglishExamLabV2 } from "@/components/english-exam-lab-v2";
 
 export default function EnglishSubjectPage() {
-  return <EnglishExamLab />;
+  return <EnglishExamLabV2 />;
 }
