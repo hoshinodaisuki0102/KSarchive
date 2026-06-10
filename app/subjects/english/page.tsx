@@ -1,5 +1,5 @@
-import { EnglishWorkspaceV3 } from "@/components/english-workspace-v3";
+import { EnglishExamLab } from "@/components/english-exam-lab";
 
 export default function EnglishSubjectPage() {
-  return <EnglishWorkspaceV3 />;
+  return <EnglishExamLab />;
 }
