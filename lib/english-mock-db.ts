@@ -27,13 +27,7 @@ const stopWords = new Set(
 );
 
 export function cleanExamText(text: string) {
-  return text
-    .replace(/\u00ad/g, "")
-    .replace(/[‐‑–—]/g, "-")
-    .replace(/\s*\n\s*/g, " ")
-    .replace(/\s+/g, " ")
-    .replace(/\s+([.,;:!?])/g, "$1")
-    .trim();
+  return text.replace(/\u00ad/g, "").replace(/[‐‑–—]/g, "-").replace(/\s*\n\s*/g, " ").replace(/\s+/g, " ").replace(/\s+([.,;:!?])/g, "$1").trim();
 }
 
 export function splitExamSentences(text: string) {
@@ -46,10 +40,19 @@ function titleOf(passage: ReadingPassage) {
   return passage.title.replace(/^\d+\.\s*/, "").replace(/[?？]/g, "").trim();
 }
 
+function hasKorean(text: string) {
+  return /[가-힣]/.test(text);
+}
+
 function contentWords(passage: ReadingPassage) {
   const words = cleanExamText(passage.passage).match(/\b[A-Za-z][A-Za-z'-]{4,}\b/g) ?? [];
   const vocab = passage.vocab.map((item) => item.word).filter((word) => /^[A-Za-z][A-Za-z' -]+$/.test(word));
   return Array.from(new Set([...vocab, ...words].map((word) => word.trim()).filter((word) => !stopWords.has(word.toLowerCase())))).slice(0, 18);
+}
+
+function koreanTerms(passage: ReadingPassage) {
+  const terms = passage.vocab.map((item) => item.meaning).filter(Boolean);
+  return Array.from(new Set(terms)).slice(0, 8);
 }
 
 function seededShuffle<T>(items: T[], seed: number) {
@@ -65,7 +68,7 @@ function seededShuffle<T>(items: T[], seed: number) {
 
 function optionize(correct: string, wrongs: string[], seed: number) {
   const unique = Array.from(new Set([correct, ...wrongs].map((item) => item.trim()).filter(Boolean))).slice(0, 5);
-  while (unique.length < 5) unique.push(`지문 내용과 방향이 맞지 않는 선택지 ${unique.length}`);
+  while (unique.length < 5) unique.push(`지문 일부만 반영한 부적절한 선택지 ${unique.length}`);
   const shuffled = seededShuffle(unique, seed);
   const answer = marks[Math.max(0, shuffled.findIndex((item) => item === correct))];
   return { options: shuffled.map((item, index) => `${marks[index]} ${item}`), answer };
@@ -90,24 +93,53 @@ function blankSentence(passage: ReadingPassage) {
   return { body, target };
 }
 
-function samePassageWrongOptions(passage: ReadingPassage) {
-  const topic = titleOf(passage);
+function buildTitleWrongs(passage: ReadingPassage, title: string) {
   const words = contentWords(passage);
-  const a = words[0] ?? "the main idea";
-  const b = words[1] ?? "the example";
+  const terms = koreanTerms(passage);
+  const a = hasKorean(title) ? terms[0] ?? "세부 사례" : words[0] ?? "a minor detail";
+  const b = hasKorean(title) ? terms[1] ?? "배경 정보" : words[1] ?? "background information";
+  if (hasKorean(title)) {
+    return [
+      `${a}만을 중심으로 한 세부 사례의 나열`,
+      `${b}의 배경을 설명하는 정보 중심 글`,
+      `글의 결론과 반대되는 관점의 필요성`,
+      `문제의 원인을 하나의 사례로만 설명하기`
+    ];
+  }
+  return [
+    `A Narrow Example of ${a}`,
+    `Background Information About ${b}`,
+    `The Opposite View of the Writer's Conclusion`,
+    `One Detail Mistaken for the Whole Point`
+  ];
+}
+
+function buildMainCorrect(passage: ReadingPassage, title: string) {
+  const type = passage.type;
+  if (type.includes("주장")) return `필자는 ${title}는 점을 주장한다.`;
+  if (type.includes("요지")) return `글은 ${title}는 점을 중심 내용으로 제시한다.`;
+  if (type.includes("주제")) return `글의 중심 주제는 ${title}이다.`;
+  return `글 전체의 핵심은 ${title}라는 점이다.`;
+}
+
+function buildMainWrongs(passage: ReadingPassage, title: string) {
+  const terms = koreanTerms(passage);
+  const words = contentWords(passage);
+  const a = terms[0] ?? words[0] ?? "세부 소재";
+  const b = terms[1] ?? words[1] ?? "예시";
+  return [
+    `${a}에 관한 세부 예시만을 글 전체의 주장으로 제시한다.`,
+    `${title}와 반대되는 결론을 중심 내용으로 제시한다.`,
+    `${b}의 원인과 결과를 서로 바꾸어 설명한다.`,
+    `글의 결론보다 배경 정보의 나열을 더 중요하게 본다.`
+  ];
+}
+
+function samePassageWrongOptions(passage: ReadingPassage) {
+  const title = titleOf(passage);
   return {
-    title: [
-      `A Minor Example Hidden in ${a}`,
-      `Why ${b} Should Be Completely Ignored`,
-      `The Opposite Effect of ${topic}`,
-      `A Historical Survey Only About ${a}`
-    ],
-    main: [
-      `${topic}와 관련된 예시 하나만을 글 전체의 주장으로 과장한다.`,
-      `${topic}에 대해 글과 반대되는 결론을 제시한다.`,
-      `${topic}의 원인과 결과를 서로 바꾸어 설명한다.`,
-      `${topic}와 무관한 실천 방법을 중심 내용으로 제시한다.`
-    ],
+    title: buildTitleWrongs(passage, title),
+    main: buildMainWrongs(passage, title),
     blank: [
       "This means that the previous idea has no connection to the writer's conclusion.",
       "For this reason, the writer argues that the opposite choice should always be made.",
@@ -126,62 +158,39 @@ export function buildMockBundle(passage: ReadingPassage): MockBundle {
 
   const titleOptions = optionize(title, wrong.title, passage.number * 11);
   problems.push({
-    id: `${passage.number}-title`,
-    number: passage.number,
-    type: "title",
-    label: "제목",
-    heading: "다음 글의 제목으로 가장 적절한 것은?",
-    body,
-    options: titleOptions.options,
-    answer: titleOptions.answer,
+    id: `${passage.number}-title`, number: passage.number, type: "title", label: "제목",
+    heading: "다음 글의 제목으로 가장 적절한 것은?", body, options: titleOptions.options, answer: titleOptions.answer,
     skill: "24번식 제목 추론",
-    explanation: "정답은 지문 전체를 포괄하는 제목입니다. 오답은 같은 지문의 소재를 쓰더라도 세부 예시만 보거나 반대 방향으로 틀어 놓은 선택지입니다."
+    explanation: "제목형은 글 전체의 소재와 결론을 함께 담아야 합니다. 오답은 소재는 비슷해도 세부 예시만 잡거나, 결론과 반대 방향으로 틀어 놓은 선택지입니다."
   });
 
-  const mainCorrect = `${title}라는 중심 내용을 글 전체의 흐름에 맞게 설명한다.`;
+  const mainCorrect = buildMainCorrect(passage, title);
   const mainOptions = optionize(mainCorrect, wrong.main, passage.number * 13);
   problems.push({
-    id: `${passage.number}-main`,
-    number: passage.number,
-    type: "main",
-    label: "요지",
-    heading: "다음 글의 요지로 가장 적절한 것은?",
-    body,
-    options: mainOptions.options,
-    answer: mainOptions.answer,
-    skill: "20·22·23번식 요지/주제",
-    explanation: "요지형은 지문 속 예시가 아니라 글 전체의 주장과 결론을 압축한 선택지를 고르는 문제입니다."
+    id: `${passage.number}-main`, number: passage.number, type: "main", label: "요지",
+    heading: passage.type.includes("주장") ? "다음 글에서 필자가 주장하는 바로 가장 적절한 것은?" : "다음 글의 요지로 가장 적절한 것은?",
+    body, options: mainOptions.options, answer: mainOptions.answer,
+    skill: "20·22·23번식 주장/요지/주제",
+    explanation: "요지형은 반복되는 핵심어, 전환 표현 뒤의 결론, 마지막 문장의 압축 내용을 확인해야 합니다. 세부 예시·배경 설명·반대 결론은 오답입니다."
   });
 
   const blank = blankSentence(passage);
   const blankOptions = optionize(blank.target, wrong.blank, passage.number * 17);
   problems.push({
-    id: `${passage.number}-blank`,
-    number: passage.number,
-    type: "blank",
-    label: "빈칸",
-    heading: "다음 빈칸에 들어갈 말로 가장 적절한 것은?",
-    body: blank.body,
-    options: blankOptions.options,
-    answer: blankOptions.answer,
+    id: `${passage.number}-blank`, number: passage.number, type: "blank", label: "빈칸",
+    heading: "다음 빈칸에 들어갈 말로 가장 적절한 것은?", body: blank.body, options: blankOptions.options, answer: blankOptions.answer,
     skill: "31~34번식 구/문장 빈칸",
-    explanation: "빈칸은 단어 하나가 아니라 지문 흐름을 잇는 구 또는 문장 단위로 출제했습니다. 앞뒤 논리 연결이 가장 자연스러운 선택지가 정답입니다."
+    explanation: "빈칸은 앞뒤 논리 연결이 가장 자연스러운 선택지를 고릅니다. 지시어, 연결어, 결론 방향을 함께 확인합니다."
   });
 
   const order = chunksAfterFirst(passage);
   const orderBody = `[주어진 글] ${order.given}\n\n(A) ${order.chunks[0]}\n\n(B) ${order.chunks[1]}\n\n(C) ${order.chunks[2]}`;
   const orderOptions = optionize("A - B - C", ["A - C - B", "B - A - C", "B - C - A", "C - A - B"], passage.number * 19);
   problems.push({
-    id: `${passage.number}-order`,
-    number: passage.number,
-    type: "order",
-    label: "순서",
-    heading: "주어진 글 다음에 이어질 글의 순서로 가장 적절한 것은?",
-    body: orderBody,
-    options: orderOptions.options,
-    answer: orderOptions.answer,
+    id: `${passage.number}-order`, number: passage.number, type: "order", label: "순서",
+    heading: "주어진 글 다음에 이어질 글의 순서로 가장 적절한 것은?", body: orderBody, options: orderOptions.options, answer: orderOptions.answer,
     skill: "36~37번식 문단 배열",
-    explanation: "첫 문장을 주어진 글로 두고, 나머지 전문을 A/B/C 문단 덩어리로 나눴습니다. 지시어, 반복어, 연결어로 흐름을 확인합니다."
+    explanation: "첫 문장을 주어진 글로 두고 나머지를 A/B/C 문단으로 나눴습니다. 지시어, 반복어, 연결어를 기준으로 흐름을 확인합니다."
   });
 
   const sentences = splitExamSentences(passage.passage);
@@ -189,26 +198,17 @@ export function buildMockBundle(passage: ReadingPassage): MockBundle {
   const insertGiven = sentences[insertIndex] ?? sentences[1] ?? body;
   const insertRest = sentences.filter((_, index) => index !== insertIndex).slice(0, 5);
   problems.push({
-    id: `${passage.number}-insert`,
-    number: passage.number,
-    type: "insert",
-    label: "삽입",
+    id: `${passage.number}-insert`, number: passage.number, type: "insert", label: "삽입",
     heading: "글의 흐름으로 보아, 주어진 문장이 들어가기에 가장 적절한 곳은?",
     body: `[주어진 문장] ${insertGiven}\n\n${insertRest.map((sentence, index) => `${marks[index]} ${sentence}`).join(" ")}`,
-    options: marks.map((mark) => `${mark} 표시 위치`),
-    answer: "③",
-    skill: "38~39번식 문장 삽입",
+    options: marks.map((mark) => `${mark} 표시 위치`), answer: "③", skill: "38~39번식 문장 삽입",
     explanation: "삽입형은 주어진 문장의 지시어, 반복 핵심어, 앞뒤 연결 관계를 보고 위치를 판단합니다."
   });
 
   const grammarText = splitExamSentences(passage.passage).slice(0, 6).join(" ");
   problems.push({
-    id: `${passage.number}-grammar`,
-    number: passage.number,
-    type: "grammar",
-    label: "어법",
-    heading: "다음 글의 밑줄 친 부분에 대한 설명으로 적절하지 않은 것은?",
-    body: grammarText,
+    id: `${passage.number}-grammar`, number: passage.number, type: "grammar", label: "어법",
+    heading: "다음 글의 밑줄 친 부분에 대한 설명으로 적절하지 않은 것은?", body: grammarText,
     options: [
       "① to부정사는 문장 내 자리와 의미에 따라 명사적·형용사적·부사적 용법을 판단한다.",
       "② 관계사/접속사는 선행사와 빠진 성분을 함께 확인해야 한다.",
@@ -216,22 +216,15 @@ export function buildMockBundle(passage: ReadingPassage): MockBundle {
       "④ be+p.p.는 수동태인지 분사 수식인지 문장 구조로 판단한다.",
       "⑤ 완료 표현은 기준 시점보다 앞선 경험·완료·계속을 나타낼 수 있다."
     ],
-    answer: "③",
-    skill: "29번식 어법 판단",
+    answer: "③", skill: "29번식 어법 판단",
     explanation: "③이 오답입니다. -ing는 진행형뿐 아니라 동명사, 현재분사, 분사구문으로도 쓰일 수 있습니다."
   });
 
   const vocabChoices = seededShuffle(words.filter((word) => !word.includes(" ")), passage.number * 23).slice(0, 5);
   problems.push({
-    id: `${passage.number}-vocab`,
-    number: passage.number,
-    type: "vocab",
-    label: "어휘",
-    heading: "다음 글에서 문맥상 낱말의 쓰임이 적절하지 않은 것은?",
-    body,
-    options: vocabChoices.map((word, index) => `${marks[index]} ${word}`),
-    answer: "④",
-    skill: "30번식 문맥 어휘",
+    id: `${passage.number}-vocab`, number: passage.number, type: "vocab", label: "어휘",
+    heading: "다음 글에서 문맥상 낱말의 쓰임이 적절하지 않은 것은?", body,
+    options: vocabChoices.map((word, index) => `${marks[index]} ${word}`), answer: "④", skill: "30번식 문맥 어휘",
     explanation: "문맥 어휘형은 단어 뜻만 보는 것이 아니라 앞뒤 문장의 긍정·부정 방향과 글의 논리에 맞는지 확인하는 유형입니다."
   });
 
