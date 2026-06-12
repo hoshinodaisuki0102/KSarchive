@@ -1,15 +1,25 @@
 import Link from "next/link";
-import { ArrowLeft, BookOpenCheck, Boxes, Calculator, Route, Sigma, Sparkles } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 import { countingFormulas } from "@/lib/math-counting-data";
 
 export default function MathPage() {
   return (
-    <main className="min-h-screen overflow-hidden bg-mesh-light text-slate-900">
+    <main className="min-h-screen bg-mesh-light text-slate-900">
       <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8">
-        <Link href="/" className="inline-flex items-center gap-2 rounded-full border border-sky-100 bg-white/85 px-4 py-2 text-sm font-black text-slate-700 shadow-card backdrop-blur transition hover:bg-sky-50">
-          <ArrowLeft className="h-4 w-4" /> 홈으로
-        </Link>
+        <Link href="/" className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-black shadow-card"><ArrowLeft className="h-4 w-4" />홈으로</Link>
+        <h1 className="mt-8 text-4xl font-black">경우의 수 공식과 적용 문제</h1>
+        <div className="mt-8 grid gap-5 lg:grid-cols-2">
+          {countingFormulas.map((item) => (
+            <article key={item.id} className="rounded-[30px] bg-white p-6 shadow-card">
+              <h2 className="text-2xl font-black">{item.title}</h2>
+              <p className="mt-2 rounded-xl bg-slate-950 px-3 py-2 font-mono text-sm font-black text-white">{item.formula}</p>
+              <p className="mt-4 text-sm font-bold leading-7">{item.when}</p>
+              <p className="mt-3 text-sm font-black leading-7">문제: {item.example}</p>
+              <p className="mt-2 text-sm font-bold leading-7 text-slate-600">풀이: {item.solution}</p>
+            </article>
+          ))}
+        </div>
       </div>
       <SiteFooter />
     </main>
