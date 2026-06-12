@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BookOpenText, BrainCircuit, Clock3, History, Sparkles, Trophy } from "lucide-react";
+import { ArrowRight, BookOpenText, BrainCircuit, Clock3, History, Sigma, Sparkles, Trophy } from "lucide-react";
 import { FloatingAIButton } from "@/components/floating-ai-button";
 import { DdayTimer } from "@/components/dday-timer";
 import { SectionHeading } from "@/components/section-heading";
@@ -14,9 +14,15 @@ export const dynamic = "force-dynamic";
 const focusCards = [
   {
     title: "영어 6월 모의고사",
-    desc: "듣기 1~17번, 독해 18~40번을 문항별로 정리했습니다. 원문·해석·어휘·구문·트레이닝을 한 화면에서 빠르게 회독합니다.",
+    desc: "듣기 1~17번, 독해 18~40번을 원문·해석·어휘·구문·트레이닝으로 정리했습니다.",
     href: "/subjects/english",
     icon: BookOpenText
+  },
+  {
+    title: "수학 경우의 수",
+    desc: "순열, 조합, 중복조합, 원순열, 심화 개념을 공식·적용 문제·단계별 풀이로 정리했습니다.",
+    href: "/subjects/math",
+    icon: Sigma
   },
   {
     title: "한국사 근대사",
@@ -26,7 +32,7 @@ const focusCards = [
   },
   {
     title: "Arona OS",
-    desc: "지문 분석 보강, 빈칸 후보 추천, 변형문제 초안 생성에 바로 활용할 수 있습니다.",
+    desc: "자료 기반 질문, 지문 분석 보강, 변형문제 초안 생성에 활용할 수 있는 학습 AI 공간입니다.",
     href: "/chat",
     icon: BrainCircuit
   }
@@ -54,11 +60,14 @@ export default async function Home() {
                 시험 범위만 빠르게.
               </h1>
               <p className="mt-6 max-w-2xl text-sm leading-8 text-slate-300 sm:text-base md:text-lg">
-                KSarchive는 친구들과 함께 쓰기 위한 비공개 내신 학습 공간입니다. 지금은 영어 6월 모의고사 범위와 한국사 근대사 타임라인을 먼저 정리했고, 나머지 과목은 자료를 받을 때마다 같은 구조로 확장합니다.
+                KSarchive는 승인된 사용자만 접근할 수 있는 내신 학습 아카이브입니다. 시험 범위 자료를 과목별로 정리하고, 원문·해석·개념·문제 훈련을 한 화면에서 빠르게 확인할 수 있도록 구성했습니다.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/subjects/english" className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 shadow-card transition hover:-translate-y-0.5 hover:bg-sky-100">
                   영어 바로 공부하기 <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link href="/subjects/math" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-black text-white backdrop-blur transition hover:bg-white/15">
+                  수학 경우의 수
                 </Link>
                 <Link href="/subjects/history" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-black text-white backdrop-blur transition hover:bg-white/15">
                   한국사 타임라인
@@ -69,7 +78,7 @@ export default async function Home() {
 
           <div className="grid gap-4">
             <DdayTimer />
-            <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
               {focusCards.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -118,7 +127,7 @@ export default async function Home() {
         <SectionHeading
           eyebrow="Subjects"
           title="6과목 구조"
-          description="현재는 영어와 한국사를 먼저 채워두었습니다. 국어, 수학, 과학, 사회는 자료를 넣을 때까지 빈 과목 슬롯으로 유지합니다."
+          description="영어 6월 모의고사, 수학 경우의 수, 한국사 근대사를 우선 정리했습니다. 나머지 과목은 자료가 들어오는 순서대로 같은 구조로 확장합니다."
         />
         <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {subjects.map((subject) => (
