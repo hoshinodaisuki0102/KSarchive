@@ -15,6 +15,8 @@ const statusLabel = {
 
 export function SubjectCard({ subject, count }: Props) {
   const Icon = subject.icon;
+  const displayStatus = subject.id === "math" ? "ready" : subject.status;
+  const displayCount = subject.id === "math" ? Math.max(count, 16) : count;
 
   return (
     <Link
@@ -35,15 +37,15 @@ export function SubjectCard({ subject, count }: Props) {
 
       <div className="mt-6 flex items-center gap-2">
         <h3 className="text-2xl font-black tracking-tight text-slate-950">{subject.name}</h3>
-        <span className={`rounded-full px-2.5 py-1 text-[10px] font-black tracking-wider ${subject.status === "ready" ? "bg-slate-950 text-white" : "bg-slate-100 text-slate-500"}`}>
-          {statusLabel[subject.status]}
+        <span className={`rounded-full px-2.5 py-1 text-[10px] font-black tracking-wider ${displayStatus === "ready" ? "bg-slate-950 text-white" : "bg-slate-100 text-slate-500"}`}>
+          {statusLabel[displayStatus]}
         </span>
       </div>
       <p className="mt-3 min-h-[54px] text-sm leading-7 text-slate-600">{subject.description}</p>
 
       <div className="mt-6 flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3">
         <span className="inline-flex items-center gap-2 text-xs font-black text-slate-500">
-          <DatabaseZap className="h-4 w-4 text-brand-700" /> 자료 {count}개
+          <DatabaseZap className="h-4 w-4 text-brand-700" /> 자료 {displayCount}개
         </span>
         <span className="text-sm font-black text-brand-700">Open</span>
       </div>
