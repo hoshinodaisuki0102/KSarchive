@@ -7,6 +7,36 @@ import { historyCategoryMeta, modernHistoryStudyTips, modernHistoryTimeline } fr
 
 const legendOrder = ["동아시아 질서", "조선-서양", "조선-일본", "개화 정책", "반개화·위정척사", "청·열강 간섭", "개혁·정변"] as const;
 
+const textbookPeople = new Set([
+  "페리",
+  "흥선대원군",
+  "고종",
+  "양헌수",
+  "어재연",
+  "박규수",
+  "김기수",
+  "김홍집",
+  "황준헌",
+  "이항로",
+  "기정진",
+  "최익현",
+  "유인석",
+  "김윤식",
+  "박정양",
+  "명성황후",
+  "위안스카이",
+  "김옥균",
+  "박영효",
+  "홍영식",
+  "서재필",
+  "이홍장",
+  "이토 히로부미"
+]);
+
+function textbookPersonOnly(people: string[]) {
+  return people.filter((person) => textbookPeople.has(person));
+}
+
 export default function HistoryPage() {
   return (
     <main className="min-h-screen overflow-hidden bg-mesh-light text-slate-900">
@@ -28,7 +58,7 @@ export default function HistoryPage() {
                 <span className="text-gradient-sky">흐름형 타임라인</span>
               </h1>
               <p className="mt-5 max-w-3xl text-sm leading-8 text-slate-300 sm:text-base">
-                이번 범위는 사건 이름만 외우면 바로 헷갈립니다. 아편 전쟁과 일본 개항이라는 국제 질서 변화에서 출발해, 흥선대원군의 통상 수교 거부, 강화도 조약, 개화 정책, 임오군란, 갑신정변, 열강의 각축까지를 원인과 결과로 연결했습니다.
+                이번 범위는 사건 이름만 외우면 바로 헷갈립니다. 국제 질서 변화에서 출발해 통상 수교 거부, 강화도 조약, 개화 정책, 임오군란, 갑신정변, 열강의 각축까지를 원인과 결과로 연결했습니다.
               </p>
             </div>
           </div>
@@ -60,7 +90,7 @@ export default function HistoryPage() {
             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-slate-950 text-white"><BookOpenCheck className="h-5 w-5" /></span>
             <div>
               <h2 className="text-2xl font-black text-slate-950">시험 직전 암기법</h2>
-              <p className="text-sm font-bold text-slate-500">상대국·인물·결과를 함께 묶기</p>
+              <p className="text-sm font-bold text-slate-500">상대국·실제 인물·결과를 함께 묶기</p>
             </div>
           </div>
           <div className="mt-5 grid gap-3 md:grid-cols-2">
@@ -100,7 +130,7 @@ export default function HistoryPage() {
               <p className="text-sm font-black uppercase tracking-[0.3em] text-brand-700">Timeline</p>
               <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">개항기 주요 사건 흐름</h2>
             </div>
-            <p className="text-sm font-bold text-slate-500">모바일에서는 카드형, PC에서는 축형 타임라인</p>
+            <p className="text-sm font-bold text-slate-500">인물 칸에는 교과서 핵심 인물만 표시</p>
           </div>
 
           <div className="relative">
@@ -108,61 +138,36 @@ export default function HistoryPage() {
             <div className="space-y-4">
               {modernHistoryTimeline.map((entry) => {
                 const meta = historyCategoryMeta[entry.category];
+                const people = textbookPersonOnly(entry.people);
                 return (
                   <article key={entry.id} className="relative rounded-[30px] border border-white/70 bg-white/90 p-5 shadow-card backdrop-blur-2xl sm:ml-16 sm:p-6">
-                    <div className={`absolute -left-[49px] top-7 hidden h-9 w-9 place-items-center rounded-full border-4 border-white text-xs font-black text-white shadow-card sm:grid ${meta.dot}`}>
-                      {entry.year.slice(0, 4).slice(-2)}
-                    </div>
+                    <div className={`absolute -left-[49px] top-7 hidden h-9 w-9 place-items-center rounded-full border-4 border-white text-xs font-black text-white shadow-card sm:grid ${meta.dot}`}>{entry.year.slice(0, 4).slice(-2)}</div>
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                       <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="rounded-2xl bg-slate-950 px-3 py-1.5 font-mono text-sm font-black text-white">{entry.year}</span>
-                          <span className={`rounded-full border px-3 py-1 text-xs font-black ${meta.chip}`}>{entry.category}</span>
-                          <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-slate-500 ring-1 ring-slate-200">{entry.relation}</span>
-                        </div>
+                        <div className="flex flex-wrap items-center gap-2"><span className="rounded-2xl bg-slate-950 px-3 py-1.5 font-mono text-sm font-black text-white">{entry.year}</span><span className={`rounded-full border px-3 py-1 text-xs font-black ${meta.chip}`}>{entry.category}</span><span className="rounded-full bg-white px-3 py-1 text-xs font-black text-slate-500 ring-1 ring-slate-200">{entry.relation}</span></div>
                         <h3 className="mt-3 text-2xl font-black tracking-tight text-slate-950">{entry.title}</h3>
                         <p className="mt-2 text-sm font-semibold leading-7 text-slate-600">{entry.summary}</p>
                       </div>
-                      <div className="flex flex-wrap gap-2 lg:max-w-[300px] lg:justify-end">
-                        {entry.keywords.map((keyword) => (
-                          <span key={keyword} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-600">#{keyword}</span>
-                        ))}
-                      </div>
+                      <div className="flex flex-wrap gap-2 lg:max-w-[300px] lg:justify-end">{entry.keywords.map((keyword) => <span key={keyword} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-600">#{keyword}</span>)}</div>
                     </div>
 
                     <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                      <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-                        <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">배경</p>
-                        <p className="mt-2 text-sm font-semibold leading-7 text-slate-700">{entry.background}</p>
-                      </div>
-                      <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-                        <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">원인</p>
-                        <p className="mt-2 text-sm font-semibold leading-7 text-slate-700">{entry.cause}</p>
-                      </div>
-                      <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-                        <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">전개</p>
-                        <p className="mt-2 text-sm font-semibold leading-7 text-slate-700">{entry.development}</p>
-                      </div>
-                      <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-                        <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">결과</p>
-                        <p className="mt-2 text-sm font-semibold leading-7 text-slate-700">{entry.result}</p>
-                      </div>
+                      <Info title="배경" text={entry.background} />
+                      <Info title="원인" text={entry.cause} />
+                      <Info title="전개" text={entry.development} />
+                      <Info title="결과" text={entry.result} />
                     </div>
 
                     <div className="mt-4 grid gap-3 lg:grid-cols-[0.75fr_1.25fr]">
                       <div className="rounded-2xl border border-indigo-100 bg-indigo-50/70 px-4 py-3">
-                        <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-indigo-500"><UsersRound className="h-4 w-4" /> 인물</p>
+                        <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-indigo-500"><UsersRound className="h-4 w-4" /> 교과서 핵심 인물</p>
                         <div className="mt-3 flex flex-wrap gap-2">
-                          {entry.people.map((person) => (
-                            <span key={person} className="rounded-full bg-white px-3 py-1 text-xs font-black text-indigo-700 ring-1 ring-indigo-100">{person}</span>
-                          ))}
+                          {people.length > 0 ? people.map((person) => <span key={person} className="rounded-full bg-white px-3 py-1 text-xs font-black text-indigo-700 ring-1 ring-indigo-100">{person}</span>) : <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-slate-400 ring-1 ring-slate-100">별도 핵심 인물 없음</span>}
                         </div>
                       </div>
                       <div className="rounded-2xl border border-amber-100 bg-amber-50/70 px-4 py-3">
                         <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-600">시험 포인트</p>
-                        <ul className="mt-2 space-y-1 text-sm font-bold leading-7 text-slate-700">
-                          {entry.exam.map((point) => <li key={point}>• {point}</li>)}
-                        </ul>
+                        <ul className="mt-2 space-y-1 text-sm font-bold leading-7 text-slate-700">{entry.exam.map((point) => <li key={point}>• {point}</li>)}</ul>
                       </div>
                     </div>
                   </article>
@@ -177,4 +182,8 @@ export default function HistoryPage() {
       <SiteFooter />
     </main>
   );
+}
+
+function Info({ title, text }: { title: string; text: string }) {
+  return <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3"><p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">{title}</p><p className="mt-2 text-sm font-semibold leading-7 text-slate-700">{text}</p></div>;
 }
