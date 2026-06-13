@@ -23,12 +23,7 @@ export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const session = await verifySessionToken(req.cookies.get(SESSION_COOKIE)?.value);
 
-  if (isPublicPath(pathname)) {
-    if (pathname === "/auth" && (session?.role === "student" || session?.role === "admin")) {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
-    return NextResponse.next();
-  }
+  if (isPublicPath(pathname)) return NextResponse.next();
 
   if (session?.role === "student" || session?.role === "admin") return NextResponse.next();
 
