@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BookOpenText, BrainCircuit, Clock3, History, Sigma, Sparkles, Trophy } from "lucide-react";
+import { ArrowRight, BookOpenText, BrainCircuit, Clock3, History, Sigma, Sparkles } from "lucide-react";
 import { FloatingAIButton } from "@/components/floating-ai-button";
 import { DdayTimer } from "@/components/dday-timer";
 import { SectionHeading } from "@/components/section-heading";
@@ -7,7 +7,6 @@ import { SiteHeader } from "@/components/site-header";
 import { SubjectCard } from "@/components/subject-card";
 import { SiteFooter } from "@/components/site-footer";
 import { getContentCount, subjectContents, subjects } from "@/lib/site-data";
-import { getLeaderboard } from "@/lib/auth-store";
 
 export const dynamic = "force-dynamic";
 
@@ -39,8 +38,6 @@ const focusCards = [
 ];
 
 export default async function Home() {
-  const leaderboard = await getLeaderboard(5);
-
   return (
     <main className="min-h-screen overflow-hidden bg-mesh-light text-slate-900">
       <SiteHeader />
@@ -96,28 +93,6 @@ export default async function Home() {
                   </Link>
                 );
               })}
-            </div>
-
-            <div className="rounded-[30px] border border-amber-100 bg-white/82 p-5 shadow-card backdrop-blur-2xl">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-xs font-black text-amber-700"><Trophy className="h-4 w-4" /> Point Leaderboard</p>
-                  <h2 className="mt-3 text-xl font-black text-slate-950">포인트 랭킹</h2>
-                </div>
-                <span className="rounded-full bg-slate-950 px-3 py-1 text-xs font-black text-white">LIVE</span>
-              </div>
-              <div className="mt-4 space-y-2">
-                {leaderboard.length > 0 ? leaderboard.map((user, index) => (
-                  <div key={user.id} className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white px-4 py-3 text-sm shadow-sm">
-                    <span className="font-black text-slate-800">{index + 1}. {user.nickname || user.realName}</span>
-                    <span className="font-black text-amber-700">{user.points}P</span>
-                  </div>
-                )) : (
-                  <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4 text-sm font-bold leading-6 text-slate-500">
-                    아직 포인트 기록이 없습니다. 영어 트레이닝을 맞히면 랭킹이 열립니다.
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         </div>
