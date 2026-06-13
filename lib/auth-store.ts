@@ -6,10 +6,9 @@ export const runtime = "nodejs";
 
 export type UserStatus = "pending" | "approved" | "rejected";
 export type AuthProvider = "credentials";
-
 export type Agreement = { noRedistribution: boolean; studentOnly: boolean; realNameCheck: boolean; copyrightNotice: boolean; };
 export type UserRecord = {
-  id: string; username: string; realName: string; studentId?: string; nickname?: string; points?: number; solvedActivities?: string[]; email?: string;
+  id: string; username: string; realName: string; studentId?: string; nickname?: string; email?: string;
   provider: AuthProvider; passwordHash?: string; salt?: string; status: UserStatus; agreement: Agreement; createdAt: string;
   approvedAt?: string; approvedBy?: string; rejectedAt?: string; rejectedReason?: string; lastLoginAt?: string;
 };
@@ -43,7 +42,12 @@ async function writeSupabaseStore(store: Store) {
   if (!hasSupabaseStore()) return false;
   try {
     const base = String(process.env.SUPABASE_URL).replace(/\/$/, "");
-    const res = await fetch(`${base}/rest/v1/${SUPABASE_TABLE}`, { method: "POST", headers: supabaseHeaders({ Prefer: "resolution=merge-duplicates" }), body: JSON.stringify({ key: SUPABASE_KEY, value: store, updated_at: new Date().toISOString() }) });
+    const res = await fetch(`${base}/rest/v1/${SUPABASE_TABLE}?on_conflict=key`, {
+      method: "POST",
+      headers: supabaseHeaders({ Prefer: "resolution=merge-duplicates,return=minimal" }),
+      body: JSON.stringify({ key: SUPABASE_KEY, value: store, updated_at: new Date().toISOString() })
+    });
+    if (!res.ok) console.error("KSarchive Supabase store write failed with status", res.status);
     return res.ok;
   } catch (error) { console.error("KSarchive Supabase store write failed:", error); return false; }
 }
@@ -59,12 +63,11 @@ export function verifyPassword(password: string, salt?: string, passwordHash?: s
 export async function findUserByUsername(username: string) { const store = await readStore(); const normalized = username.trim().toLowerCase(); return store.users.find((user) => user.username.toLowerCase() === normalized) ?? null; }
 export async function findUserById(userId: string) { const store = await readStore(); return store.users.find((user) => user.id === userId) ?? null; }
 export async function findUserByEmail(email: string) { const store = await readStore(); const normalized = email.trim().toLowerCase(); return store.users.find((user) => user.email?.toLowerCase() === normalized) ?? null; }
-
 export async function createCredentialRequest(input: { username: string; password: string; realName: string; studentId?: string; agreement: Agreement; }) {
   const store = await readStore(); const username = input.username.trim().toLowerCase();
   if (store.users.some((user) => user.username.toLowerCase() === username)) throw new Error("이미 사용 중인 아이디입니다.");
   const { salt, hash } = hashPassword(input.password);
-  const user: UserRecord = { id: randomUUID(), username, realName: input.realName.trim(), studentId: input.studentId?.trim() || undefined, provider: "credentials", salt, passwordHash: hash, status: "pending", nickname: undefined, points: 0, solvedActivities: [], agreement: input.agreement, createdAt: new Date().toISOString() };
+  const user: UserRecord = { id: randomUUID(), username, realName: input.realName.trim(), studentId: input.studentId?.trim() || undefined, provider: "credentials", salt, passwordHash: hash, status: "pending", nickname: undefined, agreement: input.agreement, createdAt: new Date().toISOString() };
   store.users.unshift(user); await writeStore(store); return user;
 }
 export async function markLogin(userId: string) { const store = await readStore(); const user = store.users.find((item) => item.id === userId); if (!user) return null; user.lastLoginAt = new Date().toISOString(); await writeStore(store); return user; }
@@ -77,10 +80,5 @@ export async function updateUserStatus(input: { userId: string; status: UserStat
 }
 export function isAgreementValid(agreement: Partial<Agreement>) { return Boolean(agreement.noRedistribution && agreement.studentOnly && agreement.realNameCheck && agreement.copyrightNotice); }
 export async function updateUserProfile(input: { userId: string; nickname?: string; }) { const store = await readStore(); const user = store.users.find((item) => item.id === input.userId); if (!user) throw new Error("사용자를 찾지 못했습니다."); const nickname = input.nickname?.trim(); if (nickname && nickname.length > 12) throw new Error("닉네임은 12자 이하로 설정해 주세요."); user.nickname = nickname || undefined; await writeStore(store); return user; }
-export async function awardUserPoints(input: { userId: string; activityId: string; points: number; }) {
-  const activityId = input.activityId.trim(); const safePoints = Math.max(0, Math.min(100, Math.floor(input.points))); if (!activityId || safePoints <= 0) throw new Error("포인트 지급 정보가 올바르지 않습니다.");
-  const store = await readStore(); const user = store.users.find((item) => item.id === input.userId); if (!user) throw new Error("사용자를 찾지 못했습니다."); if (user.status !== "approved") throw new Error("승인된 사용자만 포인트를 받을 수 있습니다.");
-  const solved = new Set(user.solvedActivities ?? []); if (solved.has(activityId)) return { user, awarded: 0, alreadySolved: true };
-  solved.add(activityId); user.solvedActivities = Array.from(solved); user.points = (user.points ?? 0) + safePoints; await writeStore(store); return { user, awarded: safePoints, alreadySolved: false };
-}
-export async function getLeaderboard(limit = 8) { const store = await readStore(); return store.users.filter((user) => user.status === "approved").map((user) => ({ id: user.id, username: user.username, realName: user.realName, nickname: user.nickname, points: user.points ?? 0 })).sort((a, b) => b.points - a.points || a.realName.localeCompare(b.realName, "ko")).slice(0, limit); }
+export async function awardUserPoints(input: { userId: string; activityId: string; points: number; }) { const user = await findUserById(input.userId); if (!user) throw new Error("사용자를 찾지 못했습니다."); return { user, awarded: 0, alreadySolved: true }; }
+export async function getLeaderboard() { return []; }
