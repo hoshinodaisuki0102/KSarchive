@@ -2,13 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut, Save, ShieldCheck, Trophy, UserRound, UsersRound, X } from "lucide-react";
+import { LogOut, Save, ShieldCheck, UserRound, UsersRound, X } from "lucide-react";
 
 type User = {
   realName: string;
   username: string;
   nickname?: string;
-  points?: number;
   role?: string;
 };
 
@@ -67,7 +66,6 @@ export function AuthStatus() {
       <button type="button" onClick={() => setOpen(true)} className="inline-flex max-w-[150px] items-center gap-1.5 rounded-full border border-sky-100 bg-white/85 px-3 py-2 text-xs font-black text-emerald-700 shadow-card transition hover:-translate-y-0.5 hover:bg-emerald-50 sm:max-w-none" title="프로필 설정">
         <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
         <span className="truncate">{displayName}</span>
-        <span className="hidden rounded-full bg-amber-50 px-2 py-0.5 text-amber-700 sm:inline-flex">{user.points ?? 0}P</span>
       </button>
       <button type="button" onClick={logout} className="hidden items-center gap-1.5 rounded-full bg-slate-950 px-3 py-2 text-xs font-black text-white transition hover:bg-red-600 lg:inline-flex">
         <LogOut className="h-3.5 w-3.5" /> 로그아웃
@@ -88,11 +86,6 @@ export function AuthStatus() {
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
               <button onClick={() => router.push("/members")} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-sky-50 px-4 py-3 text-sm font-black text-brand-700"><UsersRound className="h-4 w-4" /> 멤버 목록</button>
               {user.role === "admin" ? <button onClick={() => router.push("/admin")} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-black text-white"><ShieldCheck className="h-4 w-4" /> 승인실</button> : null}
-            </div>
-
-            <div className="mt-5 rounded-[24px] border border-amber-100 bg-amber-50 p-4">
-              <div className="flex items-center gap-2 text-lg font-black text-amber-700"><Trophy className="h-5 w-5" /> {user.points ?? 0} Point</div>
-              <p className="mt-1 text-xs font-bold leading-5 text-amber-700/80">문장 순서와 빈칸 트레이닝을 정확히 맞히면 포인트가 쌓입니다.</p>
             </div>
 
             {user.role !== "admin" ? (
