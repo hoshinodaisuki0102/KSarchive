@@ -10,6 +10,7 @@ export type SessionPayload = {
 
 export const SESSION_COOKIE = "ks_session";
 export const ADMIN_COOKIE = "ks_admin";
+export const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 90;
 
 function getSecret() {
   return process.env.KS_AUTH_SECRET || "ksarchive-local-dev-secret-change-this";
@@ -54,7 +55,7 @@ async function hmac(data: string) {
   return bytesToBase64Url(new Uint8Array(signature));
 }
 
-export async function createSessionToken(payload: Omit<SessionPayload, "exp">, maxAgeSeconds = 60 * 60 * 24 * 14) {
+export async function createSessionToken(payload: Omit<SessionPayload, "exp">, maxAgeSeconds = SESSION_MAX_AGE_SECONDS) {
   const body: SessionPayload = {
     ...payload,
     exp: Math.floor(Date.now() / 1000) + maxAgeSeconds
