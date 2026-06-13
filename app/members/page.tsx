@@ -57,7 +57,7 @@ export default async function MembersPage() {
                 </div>
                 <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">사용 가능</span>
               </div>
-              <p className="mt-4 text-xs font-bold text-slate-400">최근 로그인 {formatDate(member.lastLoginAt)} · 포인트 {member.points ?? 0}P</p>
+              <p className="mt-4 text-xs font-bold text-slate-400">최근 로그인 {formatDate(member.lastLoginAt)}</p>
             </article>
           ))}
         </section>
