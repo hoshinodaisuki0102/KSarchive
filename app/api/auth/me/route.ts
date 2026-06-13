@@ -16,7 +16,7 @@ export async function GET(req: Request) {
   if (!session) return NextResponse.json({ user: null }, { status: 401 });
 
   if (session.role === "admin") {
-    return NextResponse.json({ user: { id: "admin", username: session.username, realName: "관리자", nickname: "ADMIN", points: 0, status: "approved", provider: "credentials", role: "admin" } });
+    return NextResponse.json({ user: { id: "admin", username: session.username, realName: "관리자", nickname: "ADMIN", status: "approved", provider: "credentials", role: "admin" } });
   }
 
   const user = await findUserById(session.userId);
