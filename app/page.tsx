@@ -52,12 +52,12 @@ export default async function Home() {
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm font-black text-sky-100 backdrop-blur">
                 <Sparkles className="h-4 w-4" /> KSarchive · Final Study System
               </div>
-              <h1 className="mt-6 text-4xl font-black leading-[1.02] tracking-tight sm:text-5xl md:text-6xl">
-                필요한 것만 깔끔하게,<br />
-                시험 범위만 빠르게.
+              <h1 className="mt-6 font-black leading-[1.08] tracking-tight text-[clamp(1.7rem,7.2vw,4rem)] md:text-6xl">
+                <span className="block whitespace-nowrap">필요한 정보를 빠르게,</span>
+                <span className="block whitespace-nowrap">경신고 내신 아카이브</span>
               </h1>
               <p className="mt-6 max-w-2xl text-sm leading-8 text-slate-300 sm:text-base md:text-lg">
-                KSarchive는 승인된 사용자만 접근할 수 있는 내신 학습 아카이브입니다. 시험 범위 자료를 과목별로 정리하고, 원문·해석·개념·문제 훈련을 한 화면에서 빠르게 확인할 수 있도록 구성했습니다.
+                과목별 시험 범위 자료를 한곳에 모아 원문·해석·핵심 개념·변형문제·타임라인을 빠르게 확인할 수 있습니다. 필요한 자료만 찾아 바로 복습할 수 있도록 학습 흐름을 카드형으로 정리했습니다.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/subjects/english" className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 shadow-card transition hover:-translate-y-0.5 hover:bg-sky-100">
