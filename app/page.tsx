@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, BookOpenText, BrainCircuit, Clock3, History, Sigma, Sparkles } from "lucide-react";
 import { FloatingAIButton } from "@/components/floating-ai-button";
@@ -7,37 +9,22 @@ import { SiteHeader } from "@/components/site-header";
 import { SubjectCard } from "@/components/subject-card";
 import { SiteFooter } from "@/components/site-footer";
 import { getContentCount, subjectContents, subjects } from "@/lib/site-data";
+import { SESSION_COOKIE, verifySessionToken } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 const focusCards = [
-  {
-    title: "영어 6월 모의고사",
-    desc: "듣기 1~17번, 독해 18~40번을 원문·해석·어휘·구문·트레이닝으로 정리했습니다.",
-    href: "/subjects/english",
-    icon: BookOpenText
-  },
-  {
-    title: "수학 경우의 수",
-    desc: "순열, 조합, 중복조합, 원순열, 심화 개념을 공식·적용 문제·단계별 풀이로 정리했습니다.",
-    href: "/subjects/math",
-    icon: Sigma
-  },
-  {
-    title: "한국사 근대사",
-    desc: "흥선대원군 집권부터 국권 피탈까지 사건 흐름을 연도별 타임라인으로 연결했습니다.",
-    href: "/subjects/history",
-    icon: History
-  },
-  {
-    title: "Arona OS",
-    desc: "자료 기반 질문, 지문 분석 보강, 변형문제 초안 생성에 활용할 수 있는 학습 AI 공간입니다.",
-    href: "/chat",
-    icon: BrainCircuit
-  }
+  { title: "영어 6월 모의고사", desc: "듣기 1~17번, 독해 18~40번을 원문·해석·어휘·구문·트레이닝으로 정리했습니다.", href: "/subjects/english", icon: BookOpenText },
+  { title: "수학 경우의 수", desc: "순열, 조합, 중복조합, 원순열, 심화 개념을 공식·적용 문제·단계별 풀이로 정리했습니다.", href: "/subjects/math", icon: Sigma },
+  { title: "한국사 근대사", desc: "흥선대원군 집권부터 국권 피탈까지 사건 흐름을 연도별 타임라인으로 연결했습니다.", href: "/subjects/history", icon: History },
+  { title: "Arona OS", desc: "자료 기반 질문, 지문 분석 보강, 변형문제 초안 생성에 활용할 수 있는 학습 AI 공간입니다.", href: "/chat", icon: BrainCircuit }
 ];
 
 export default async function Home() {
+  const cookieStore = await cookies();
+  const session = await verifySessionToken(cookieStore.get(SESSION_COOKIE)?.value);
+  if (!session) redirect("/auth?next=/");
+
   return (
     <main className="min-h-screen overflow-hidden bg-mesh-light text-slate-900">
       <SiteHeader />
@@ -81,9 +68,7 @@ export default async function Home() {
                 return (
                   <Link key={item.title} href={item.href} className="group rounded-[30px] border border-white/70 bg-white/78 p-5 shadow-card backdrop-blur-2xl transition hover:-translate-y-1 hover:shadow-neon">
                     <div className="flex items-center gap-3">
-                      <span className="grid h-12 w-12 place-items-center rounded-2xl bg-slate-950 text-white transition group-hover:scale-105">
-                        <Icon className="h-5 w-5" />
-                      </span>
+                      <span className="grid h-12 w-12 place-items-center rounded-2xl bg-slate-950 text-white transition group-hover:scale-105"><Icon className="h-5 w-5" /></span>
                       <div>
                         <h2 className="font-black text-slate-950">{item.title}</h2>
                         <p className="mt-1 inline-flex items-center gap-1 text-xs font-black text-brand-700">열기 <ArrowRight className="h-3.5 w-3.5" /></p>
@@ -99,15 +84,9 @@ export default async function Home() {
       </section>
 
       <section id="subjects" className="mx-auto max-w-7xl px-5 py-10 lg:px-8">
-        <SectionHeading
-          eyebrow="Subjects"
-          title="6과목 구조"
-          description="영어 6월 모의고사, 수학 경우의 수, 한국사 근대사를 우선 정리했습니다. 나머지 과목은 자료가 들어오는 순서대로 같은 구조로 확장합니다."
-        />
+        <SectionHeading eyebrow="Subjects" title="6과목 구조" description="영어 6월 모의고사, 수학 경우의 수, 한국사 근대사를 우선 정리했습니다. 나머지 과목은 자료가 들어오는 순서대로 같은 구조로 확장합니다." />
         <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {subjects.map((subject) => (
-            <SubjectCard key={subject.id} subject={subject} count={getContentCount(subjectContents[subject.id])} />
-          ))}
+          {subjects.map((subject) => <SubjectCard key={subject.id} subject={subject} count={getContentCount(subjectContents[subject.id])} />)}
         </div>
       </section>
 
@@ -117,9 +96,7 @@ export default async function Home() {
             <div>
               <p className="inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-1.5 text-xs font-black text-red-600"><Clock3 className="h-4 w-4" /> 시험 직전 사용법</p>
               <h2 className="mt-4 text-2xl font-black text-slate-950">원문 → 어휘 → 구문 → 트레이닝 순서로 회독</h2>
-              <p className="mt-3 max-w-3xl text-sm font-semibold leading-7 text-slate-600">
-                긴 설명을 여기저기 흩뿌리지 않고, 문항별 페이지에서 필요한 학습 요소만 바로 확인하도록 정리했습니다. 모바일에서도 카드가 세로로 자연스럽게 쌓이도록 구성했습니다.
-              </p>
+              <p className="mt-3 max-w-3xl text-sm font-semibold leading-7 text-slate-600">긴 설명을 여기저기 흩뿌리지 않고, 문항별 페이지에서 필요한 학습 요소만 바로 확인하도록 정리했습니다. 모바일에서도 카드가 세로로 자연스럽게 쌓이도록 구성했습니다.</p>
             </div>
             <Link href="/chat" className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-card transition hover:-translate-y-0.5 hover:bg-brand-700">
               AI로 보강하기 <BrainCircuit className="h-4 w-4" />
