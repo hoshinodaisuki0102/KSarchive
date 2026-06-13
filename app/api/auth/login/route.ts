@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { findUserByUsername, markLogin, publicUser, verifyPassword } from "@/lib/auth-store";
-import { ADMIN_COOKIE, createSessionToken, SESSION_COOKIE } from "@/lib/session";
+import { ADMIN_COOKIE, createSessionToken, SESSION_COOKIE, SESSION_MAX_AGE_SECONDS } from "@/lib/session";
 
 export const runtime = "nodejs";
 
@@ -11,7 +11,7 @@ function isAdminCredential(username: string, password: string) {
   return username === adminUsername && password === adminPassword;
 }
 
-function setSessionCookies(res: NextResponse, token: string, maxAge = 60 * 60 * 24 * 14) {
+function setSessionCookies(res: NextResponse, token: string, maxAge = SESSION_MAX_AGE_SECONDS) {
   const cookieOptions = {
     httpOnly: true,
     sameSite: "lax" as const,
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     if (isAdminCredential(username, password)) {
       const token = await createSessionToken(
         { userId: "admin", username, realName: "관리자", role: "admin" },
-        60 * 60 * 24 * 14
+        SESSION_MAX_AGE_SECONDS
       );
       const res = NextResponse.json({
         ok: true,
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
         sameSite: "lax",
         secure: process.env.NODE_ENV === "production",
         path: "/",
-        maxAge: 60 * 60 * 24 * 14
+        maxAge: SESSION_MAX_AGE_SECONDS
       });
       return res;
     }
@@ -70,7 +70,7 @@ export async function POST(req: Request) {
     }
 
     await markLogin(user.id);
-    const token = await createSessionToken({ userId: user.id, username: user.username, realName: user.realName, role: "student" });
+    const token = await createSessionToken({ userId: user.id, username: user.username, realName: user.realName, role: "student" }, SESSION_MAX_AGE_SECONDS);
     const res = NextResponse.json({ ok: true, user: publicUser(user) });
     setSessionCookies(res, token);
     return res;
