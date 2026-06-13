@@ -21,7 +21,7 @@ export function AuthStatus() {
 
   async function loadUser() {
     try {
-      const res = await fetch("/api/auth/me", { cache: "no-store" });
+      const res = await fetch("/api/auth/me", { cache: "no-store", credentials: "same-origin" });
       if (!res.ok) return;
       const data = await res.json();
       if (data?.user) {
@@ -34,7 +34,9 @@ export function AuthStatus() {
   useEffect(() => { loadUser(); }, []);
 
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
+    await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
+    setUser(null);
+    setOpen(false);
     router.replace("/auth");
     router.refresh();
   }
@@ -44,7 +46,7 @@ export function AuthStatus() {
     setSaving(true);
     setMessage("");
     try {
-      const res = await fetch("/api/user/profile", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nickname }) });
+      const res = await fetch("/api/user/profile", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nickname }), credentials: "same-origin" });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? "닉네임 저장 실패");
       setUser(data.user);
@@ -58,17 +60,21 @@ export function AuthStatus() {
     }
   }
 
-  if (!user) return null;
+  if (!user) {
+    return <button type="button" onClick={() => router.push("/auth")} className="inline-flex items-center gap-1.5 rounded-full border border-sky-100 bg-white/85 px-3 py-2 text-xs font-black text-slate-700 shadow-card transition hover:bg-sky-50">로그인</button>;
+  }
+
   const displayName = user.nickname || user.realName || user.username;
 
   return (
-    <div className="flex items-center gap-2">
-      <button type="button" onClick={() => setOpen(true)} className="inline-flex max-w-[150px] items-center gap-1.5 rounded-full border border-sky-100 bg-white/85 px-3 py-2 text-xs font-black text-emerald-700 shadow-card transition hover:-translate-y-0.5 hover:bg-emerald-50 sm:max-w-none" title="프로필 설정">
+    <div className="flex shrink-0 items-center gap-2">
+      <button type="button" onClick={() => setOpen(true)} className="inline-flex max-w-[120px] items-center gap-1.5 rounded-full border border-sky-100 bg-white/85 px-3 py-2 text-xs font-black text-emerald-700 shadow-card transition hover:-translate-y-0.5 hover:bg-emerald-50 sm:max-w-[170px]" title="계정 정보">
         <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
         <span className="truncate">{displayName}</span>
       </button>
-      <button type="button" onClick={logout} className="hidden items-center gap-1.5 rounded-full bg-slate-950 px-3 py-2 text-xs font-black text-white transition hover:bg-red-600 lg:inline-flex">
-        <LogOut className="h-3.5 w-3.5" /> 로그아웃
+      <button type="button" onClick={logout} className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-red-50 text-red-600 shadow-card transition hover:bg-red-600 hover:text-white sm:w-auto sm:px-3 sm:text-xs sm:font-black" title="로그아웃">
+        <LogOut className="h-3.5 w-3.5" />
+        <span className="hidden sm:ml-1.5 sm:inline">로그아웃</span>
       </button>
 
       {open && (
@@ -97,7 +103,7 @@ export function AuthStatus() {
             ) : <p className="mt-5 rounded-2xl bg-sky-50 p-4 text-sm font-bold leading-6 text-brand-700">관리자 계정은 승인실과 학습 공간을 모두 바로 이용할 수 있습니다.</p>}
 
             {message && <p className="mt-3 text-sm font-black text-red-600">{message}</p>}
-            <button onClick={logout} className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-black text-red-600 lg:hidden"><LogOut className="h-4 w-4" /> 로그아웃</button>
+            <button onClick={logout} className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-black text-red-600"><LogOut className="h-4 w-4" /> 로그아웃</button>
           </div>
         </div>
       )}
