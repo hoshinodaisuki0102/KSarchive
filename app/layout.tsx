@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { KsSplash } from "@/components/ks-splash";
 import { PwaRegister } from "@/components/pwa-register";
 import "./globals.css";
 
@@ -6,11 +7,7 @@ export const metadata: Metadata = {
   title: "KSarchive",
   description: "경신고등학교 내신 대비용 학습 아카이브",
   manifest: "/manifest.webmanifest",
-  appleWebApp: {
-    capable: true,
-    title: "KSarchive",
-    statusBarStyle: "black-translucent"
-  },
+  appleWebApp: { capable: true, title: "KSarchive", statusBarStyle: "black-translucent" },
   icons: {
     icon: [
       { url: "/pwa-192.png", sizes: "192x192", type: "image/png" },
@@ -20,22 +17,14 @@ export const metadata: Metadata = {
   }
 };
 
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  viewportFit: "cover",
-  themeColor: "#0f172a"
-};
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#0f172a" };
 
-export default function RootLayout({
-  children
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ko">
       <body>
         <PwaRegister />
+        <KsSplash />
         {children}
       </body>
     </html>
