@@ -16,6 +16,7 @@ export const dynamic = "force-dynamic";
 
 const focusCards = [
   { title: "영어 6월 모의고사", desc: "듣기 1~17번, 독해 18~40번을 원문·해석·어휘·구문·트레이닝으로 정리했습니다.", href: "/subjects/english", icon: BookOpenText },
+  { title: "DAY 16~25 단어 테스트", desc: "756개 단어를 4지선다, 직접 입력, 플래시카드, 오답노트로 반복 학습합니다.", href: "/subjects/english/vocab", icon: BookOpenText },
   { title: "수학 경우의 수", desc: "순열, 조합, 중복조합, 원순열, 심화 개념을 공식·적용 문제·단계별 풀이로 정리했습니다.", href: "/subjects/math", icon: Sigma },
   { title: "한국사 근대사", desc: "흥선대원군 집권부터 국권 피탈까지 사건 흐름을 연도별 타임라인으로 연결했습니다.", href: "/subjects/history", icon: History },
   { title: "Arona OS", desc: "자료 기반 질문, 지문 분석 보강, 변형문제 초안 생성에 활용할 수 있는 학습 AI 공간입니다.", href: "/chat", icon: BrainCircuit }
@@ -53,6 +54,7 @@ export default async function Home() {
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/subjects/english" className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 shadow-card transition hover:-translate-y-0.5 hover:bg-sky-100">영어 바로 공부하기 <ArrowRight className="h-4 w-4" /></Link>
+                <Link href="/subjects/english/vocab" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-black text-white backdrop-blur transition hover:bg-white/15">단어 테스트</Link>
                 <Link href="/subjects/math" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-black text-white backdrop-blur transition hover:bg-white/15">수학 경우의 수</Link>
                 <Link href="/subjects/history" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-3 text-sm font-black text-white backdrop-blur transition hover:bg-white/15">한국사 타임라인</Link>
               </div>
